@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <title>MELHOR CHIMERA</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    #imageContainer {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    img {
+      max-width: 400px;
+      height: auto;
+      filter: grayscale(100%);
+      transition: filter 0.3s;
+      border: 2px solid transparent;
+      margin: 10px;
+    }
+
+    img:hover {
+      filter: grayscale(0%);
+      border-color: green;
+    }
+
+    #roundText {
+      font-size: 24px;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    #resultContainer {
+      margin-top: 30px;
+    }
+
+    #resultContainer h2 {
+      margin-bottom: 10px;
+    }
+
+    #resultContainer ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #resultContainer li {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>MELHOR CHIMERA</h1>
+
+  <div id="roundText"></div>
+
+  <div id="imageContainer"></div>
+
+  <div id="resultContainer"></div>
+
+  <script>
+    var images = [
+      "https://media.discordapp.net/attachments/864235266268069901/1118565414654459904/Sem_titulo.jpg",
+      "https://media.discordapp.net/attachments/864235266268069901/1118574648980930580/Ikalgo_CA_Portrait.webp",
+      "https://media.discordapp.net/attachments/864235266268069901/1118574704266063882/Hina_CA_Portrait.webp",
+      "https://media.discordapp.net/attachments/864235266268069901/1118574810075762849/Flutter_CA_Portrait.webp",
+      "https://media.discordapp.net/attachments/864235266268069901/1118575044650610721/Cheetu_CA_Portrait.webp",
+      "https://media.discordapp.net/attachments/864235266268069901/1118575073016680539/Leol_CA_Portrait.webp",
+      "https://media.discordapp.net/attachments/864235266268069901/1118575110274682910/Meleoron_CA_Portrait.webp",
+      "https://media.discordapp.net/attachments/864235266268069901/1118575144781234316/Welfin_CA_Portrait.webp"
+    ];
+
+    var currentIndex = 0;
+    var imageContainer = document.getElementById("imageContainer");
+    var roundText = document.getElementById("roundText");
+    var resultContainer = document.getElementById("resultContainer");
+
+    var round = 1;
+    var votes = [];
+
+    // Função para embaralhar as imagens aleatoriamente
+    function shuffleImages() {
+      for (var i = images.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = images[i];
+        images[i] = images[j];
+        images[j] = temp;
+      }
+    }
+
+    function vote(selectedImage) {
+      var votedImages = [images[currentIndex], images[currentIndex + 1]];
+      votes.push({ round: round, images: votedImages, selectedImage: selectedImage });
+
+      currentIndex += 2;
+      if (currentIndex < images.length) {
+        showImages();
+      } else {
+        round++;
+        if (round <= 7) { // Defina o número de rodadas desejadas aqui
+          currentIndex = 0;
+          shuffleImages();
+          showImages();
+        } else {
+          roundText.innerHTML = "Votação concluída!";
+          showResults();
+        }
+      }
+    }
+
+    function showImages() {
+      roundText.innerHTML = "Rodada " + round;
+
+      imageContainer.innerHTML = "";
+
+      var image1 = document.createElement("img");
+      image1.src = images[currentIndex];
+      imageContainer.appendChild(image1);
+
+      var image2 = document.createElement("img");
+      image2.src = images[currentIndex + 1];
+      imageContainer.appendChild(image2);
+
+      // Adiciona os event listeners para votar ao clicar nas imagens
+      image1.addEventListener("click", function() {
+        vote(1);
+        image1.style.pointerEvents = "none";
+        image2.style.pointerEvents = "none";
+      });
+
+      image2.addEventListener("click", function() {
+        vote(2);
+        image1.style.pointerEvents = "none";
+        image2.style.pointerEvents = "none";
+      });
+
+      image1.style.pointerEvents = "auto";
+      image2.style.pointerEvents = "auto";
+    }
+
+    function showResults() {
+      resultContainer.innerHTML = "";
+
+      var resultTitle = document.createElement("h2");
+      resultTitle.innerHTML = "Resultados";
+      resultContainer.appendChild(resultTitle);
+
+      // Contabiliza os votos para cada imagem
+      var voteCount = {};
+      for (var i = 0; i < images.length; i++) {
+        voteCount[images[i]] = 0;
+      }
+
+      // Conta os votos
+      for (var j = 0; j < votes.length; j++) {
+        var selectedImage = votes[j].images[votes[j].selectedImage - 1];
+        voteCount[selectedImage]++;
+      }
+
+      // Ordena as imagens por quantidade de votos
+      var sortedImages = Object.keys(voteCount).sort(function(a, b) {
+        return voteCount[b] - voteCount[a];
+      });
+
+      var resultList = document.createElement("ul");
+
+      // Exibe as imagens e seus respectivos votos
+      for (var imageIndex = 0; imageIndex < sortedImages.length; imageIndex++) {
+        var listItem = document.createElement("li");
+        var image = document.createElement("img");
+        image.src = sortedImages[imageIndex];
+        image.style.maxWidth = "200px";
+        image.style.height = "auto";
+        listItem.appendChild(image);
+        listItem.innerHTML += " - " + voteCount[sortedImages[imageIndex]] + " votos";
+        resultList.appendChild(listItem);
+      }
+
+      resultContainer.appendChild(resultList);
+    }
+
+    shuffleImages();
+    showImages();
+  </script>
+</body>
+</html>
