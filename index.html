@@ -1,7 +1,7 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-  <title>MELHOR CHIMERA</title>
+  <title>MELHOR CHIMERA!</title>
   <style>
     body {
       display: flex;
@@ -56,7 +56,7 @@
   </style>
 </head>
 <body>
-  <h1>MELHOR CHIMERA</h1>
+  <h1>MELHOR CHIMERA!</h1>
 
   <div id="roundText"></div>
 
@@ -76,6 +76,7 @@
       "https://media.discordapp.net/attachments/864235266268069901/1118575144781234316/Welfin_CA_Portrait.webp"
     ];
 
+    var imagePairs = [];
     var currentIndex = 0;
     var imageContainer = document.getElementById("imageContainer");
     var roundText = document.getElementById("roundText");
@@ -84,28 +85,62 @@
     var round = 1;
     var votes = [];
 
-    // Função para embaralhar as imagens aleatoriamente
-    function shuffleImages() {
-      for (var i = images.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = images[i];
-        images[i] = images[j];
-        images[j] = temp;
+    // Função para criar pares de imagens
+    function createImagePairs() {
+      var numImages = images.length;
+      for (var i = 0; i < numImages; i++) {
+        for (var j = i + 1; j < numImages; j++) {
+          imagePairs.push([images[i], images[j]]);
+        }
       }
     }
 
-    function vote(selectedImage) {
-      var votedImages = [images[currentIndex], images[currentIndex + 1]];
-      votes.push({ round: round, images: votedImages, selectedImage: selectedImage });
+    // Função para embaralhar os pares de imagens
+    function shufflePairs() {
+      for (var i = imagePairs.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        [imagePairs[i], imagePairs[j]] = [imagePairs[j], imagePairs[i]];
+      }
+    }
 
-      currentIndex += 2;
-      if (currentIndex < images.length) {
+    // Função para exibir as imagens da rodada atual
+    function showImages() {
+      roundText.innerHTML = "Quem você prefere? ";
+
+      imageContainer.innerHTML = "";
+
+      var pair = imagePairs[currentIndex];
+      var image1 = document.createElement("img");
+      image1.src = pair[0];
+      imageContainer.appendChild(image1);
+
+      var image2 = document.createElement("img");
+      image2.src = pair[1];
+      imageContainer.appendChild(image2);
+
+      // Adiciona os event listeners para votar ao clicar nas imagens
+      image1.addEventListener("click", function() {
+        vote(1);
+      });
+
+      image2.addEventListener("click", function() {
+        vote(2);
+      });
+    }
+
+    // Função para registrar o voto e avançar para a próxima rodada
+    function vote(selectedImage) {
+      var pair = imagePairs[currentIndex];
+      votes.push({ round: round, images: pair, selectedImage: selectedImage });
+
+      currentIndex++;
+      if (currentIndex < imagePairs.length) {
         showImages();
       } else {
         round++;
-        if (round <= 7) { // Defina o número de rodadas desejadas aqui
+        if (round <= 1) { // Defina o número de rodadas desejadas aqui
           currentIndex = 0;
-          shuffleImages();
+          shufflePairs();
           showImages();
         } else {
           roundText.innerHTML = "Votação concluída!";
@@ -114,36 +149,7 @@
       }
     }
 
-    function showImages() {
-      roundText.innerHTML = "Rodada " + round;
-
-      imageContainer.innerHTML = "";
-
-      var image1 = document.createElement("img");
-      image1.src = images[currentIndex];
-      imageContainer.appendChild(image1);
-
-      var image2 = document.createElement("img");
-      image2.src = images[currentIndex + 1];
-      imageContainer.appendChild(image2);
-
-      // Adiciona os event listeners para votar ao clicar nas imagens
-      image1.addEventListener("click", function() {
-        vote(1);
-        image1.style.pointerEvents = "none";
-        image2.style.pointerEvents = "none";
-      });
-
-      image2.addEventListener("click", function() {
-        vote(2);
-        image1.style.pointerEvents = "none";
-        image2.style.pointerEvents = "none";
-      });
-
-      image1.style.pointerEvents = "auto";
-      image2.style.pointerEvents = "auto";
-    }
-
+    // Função para exibir os resultados finais
     function showResults() {
       resultContainer.innerHTML = "";
 
@@ -185,7 +191,8 @@
       resultContainer.appendChild(resultList);
     }
 
-    shuffleImages();
+    createImagePairs();
+    shufflePairs();
     showImages();
   </script>
 </body>
